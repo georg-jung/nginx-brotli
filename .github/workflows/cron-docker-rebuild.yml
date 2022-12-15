@@ -6,7 +6,6 @@ on:
     - cron:  '0 1 * * *'
 
 env:
-  REGISTRY: docker.io
   IMAGE_NAME: georgjung/nginx-brotli
   BASE_IMAGE: nginx
 
@@ -24,14 +23,14 @@ jobs:
         uses: georg-jung/docker-image-update-checker@main
         with:
           base-image: ${{ env.BASE_IMAGE }}:mainline
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:mainline
+          image: ${{ env.IMAGE_NAME }}:mainline
           verbose: true
       - name: Docker Image Update Checker mainline-alpine
         id: check2
         uses: georg-jung/docker-image-update-checker@main
         with:
           base-image: ${{ env.BASE_IMAGE }}:mainline-alpine
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:mainline-alpine
+          image: ${{ env.IMAGE_NAME }}:mainline-alpine
           verbose: true
   call_rebuild:
     needs: check_base_image_updated
