@@ -5,7 +5,7 @@
 
 ## What is this?
 
-A drop-in replacement for the official [`nginx:mainline`](https://hub.docker.com/_/nginx)/`nginx:latest` and `nginx:mainline-alpine` images with brotli support. Updates are fully automated so this does not get stale.
+A drop-in replacement for the official [`nginx:mainline`](https://hub.docker.com/_/nginx)/`nginx:latest` and `nginx:mainline-alpine` images with brotli support. Updates are fully automated so our images should not get stale.
 
 ## Who is this for?
 
