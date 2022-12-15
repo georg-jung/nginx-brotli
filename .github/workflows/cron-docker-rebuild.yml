@@ -6,9 +6,9 @@ on:
     - cron:  '0 1 * * *'
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  BASE_IMAGE: nginx:mainline
+  REGISTRY: docker.io
+  IMAGE_NAME: georgjung/nginx-brotli
+  BASE_IMAGE: nginx
 
 jobs:
   check_base_image_updated:
@@ -23,9 +23,8 @@ jobs:
         id: check
         uses: georg-jung/docker-image-update-checker@main
         with:
-          base-image: ${{ env.BASE_IMAGE }}
+          base-image: ${{ env.BASE_IMAGE }}:mainline
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:mainline
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           verbose: true
   call_rebuild:
     needs: check_base_image_updated
