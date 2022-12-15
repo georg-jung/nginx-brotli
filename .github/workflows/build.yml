@@ -12,6 +12,14 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3 # we need the bash script in this repo
+    - name: get tags besides latest
+      id: tags
+      run: |
+        echo "tags<<eof58302eedc85c" >> $GITHUB_OUTPUT
+        ./docker-tag-groups.sh library/nginx latest | jq '.[][][]' | sort | uniq | tr -d '\"' | awk '{print "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:" $0}' >> $GITHUB_OUTPUT
+        echo "eof58302eedc85c" >> $GITHUB_OUTPUT
+      shell: bash
     - name: Download Dockerfile
       run: curl https://raw.githubusercontent.com/nginxinc/docker-nginx/master/modules/Dockerfile > Dockerfile
     - name: Set up Docker Buildx
@@ -27,6 +35,7 @@ jobs:
       with:
         context: .
         file: Dockerfile
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        tags: |
+          ${{ steps.tags.outputs.tags }}
         build-args: ENABLED_MODULES=brotli
         push: true
