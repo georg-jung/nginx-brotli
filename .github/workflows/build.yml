@@ -2,6 +2,8 @@ name: Build custom nginx
 
 on:
   push:
+    paths-ignore:
+      - '**.md'
   workflow_call:
 
 env:

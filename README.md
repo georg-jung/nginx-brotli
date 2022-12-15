@@ -9,7 +9,7 @@ A drop-in replacement for the official [`nginx:mainline`](https://hub.docker.com
 
 ## Who is this for?
 
-Everyone who uses `nginx:latest` but also wants support for brotli compression or serving of `static_resource.css.br`-style files with `brotli_static`. Take a look at the [`ngx_brotli`](https://github.com/google/ngx_brotli) repository for details about which additional options are available.
+Everyone who uses `nginx:latest` but also wants support for brotli compression or serving of `static_resource.css.br`-style files with `brotli_static`. Note that currently only `linux/amd64` is supported. Take a look at the [`ngx_brotli`](https://github.com/google/ngx_brotli) repository for details about which additional options are available.
 
 ## How this is done?
 
