@@ -13,11 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3 # we need the bash script in this repo
-    - name: get tags besides latest
+    - name: get tags besides mainline
       id: tags
       run: |
         echo "tags<<eof58302eedc85c" >> $GITHUB_OUTPUT
-        ./docker-tag-groups.sh library/nginx latest | jq '.[][][]' | sort | uniq | tr -d '\"' | awk '{print "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:" $0}' >> $GITHUB_OUTPUT
+        ./docker-tag-groups.sh library/nginx mainline | jq '.[][][]' | sort | uniq | tr -d '\"' | awk '{print "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:" $0}' >> $GITHUB_OUTPUT
         echo "eof58302eedc85c" >> $GITHUB_OUTPUT
       shell: bash
     - name: Download Dockerfile
