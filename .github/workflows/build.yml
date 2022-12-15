@@ -13,17 +13,24 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - tag: mainline
+            dockerfile: Dockerfile
+          - tag: mainline-alpine
+            dockerfile: Dockerfile.alpine
     steps:
     - uses: actions/checkout@v3 # we need the bash script in this repo
-    - name: get tags besides mainline
+    - name: get tags besides ${{ matrix.tag }}
       id: tags
       run: |
         echo "tags<<eof58302eedc85c" >> $GITHUB_OUTPUT
-        ./docker-tag-groups.sh library/nginx mainline | jq '.[][][]' | sort | uniq | tr -d '\"' | awk '{print "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:" $0}' >> $GITHUB_OUTPUT
+        ./docker-tag-groups.sh library/nginx ${{ matrix.tag }} | jq '.[][][]' | sort | uniq | tr -d '\"' | awk '{print "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:" $0}' >> $GITHUB_OUTPUT
         echo "eof58302eedc85c" >> $GITHUB_OUTPUT
       shell: bash
     - name: Download Dockerfile
-      run: curl https://raw.githubusercontent.com/nginxinc/docker-nginx/master/modules/Dockerfile > Dockerfile
+      run: curl https://raw.githubusercontent.com/nginxinc/docker-nginx/master/modules/${{ matrix.dockerfile }} > ${{ matrix.dockerfile }}
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
     - name: Log in to the Container registry
@@ -36,7 +43,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         context: .
-        file: Dockerfile
+        file: ${{ matrix.dockerfile }}
         tags: |
           ${{ steps.tags.outputs.tags }}
         build-args: ENABLED_MODULES=brotli

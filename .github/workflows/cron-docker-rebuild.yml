@@ -17,16 +17,23 @@ jobs:
       contents: read
       packages: read
     outputs:
-      image-needs-updating: ${{ steps.check.outputs.needs-updating }}
+      images-need-updating: ${{ steps.check1.outputs.needs-updating == 'true' || steps.check2.outputs.needs-updating == 'true' }}
     steps:
-      - name: Docker Image Update Checker
-        id: check
+      - name: Docker Image Update Checker mainline
+        id: check1
         uses: georg-jung/docker-image-update-checker@main
         with:
           base-image: ${{ env.BASE_IMAGE }}:mainline
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:mainline
           verbose: true
+      - name: Docker Image Update Checker mainline-alpine
+        id: check2
+        uses: georg-jung/docker-image-update-checker@main
+        with:
+          base-image: ${{ env.BASE_IMAGE }}:mainline-alpine
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:mainline-alpine
+          verbose: true
   call_rebuild:
     needs: check_base_image_updated
-    if: ${{ needs.check_base_image_updated.outputs.image-needs-updating == 'true' }}
+    if: ${{ needs.check_base_image_updated.outputs.images-need-updating == 'true' }}
     uses: ./.github/workflows/build.yml
