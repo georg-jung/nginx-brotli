@@ -3,7 +3,7 @@ name: Regular base image update check
 on:
   workflow_dispatch:
   schedule:
-    - cron:  '0 1 * * *'
+    - cron:  '0 1,13 * * *'
 
 env:
   IMAGE_NAME: georgjung/nginx-brotli
