@@ -36,3 +36,4 @@ jobs:
     needs: check_base_image_updated
     if: ${{ needs.check_base_image_updated.outputs.images-need-updating == 'true' }}
     uses: ./.github/workflows/build.yml
+    secrets: inherit
