@@ -1,0 +1,33 @@
+name: docker push on workflow_dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      push:
+        description: 'Push to Docker Hub?'
+        required: true
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: georgjung/nginx-brotli
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - tag: mainline
+            dockerfile: Dockerfile
+            platforms: linux/amd64,linux/arm64
+          - tag: mainline-alpine
+            dockerfile: Dockerfile.alpine
+            platforms: linux/amd64,linux/arm64
+    uses: ./.github/workflows/build.yml
+    with:
+      dockerfile: ${{ matrix.dockerfile }}
+      tag: ${{ matrix.tag }}
+      platforms: ${{ matrix.platforms }}
+      push: ${{ inputs.push }}
+    secrets: inherit
