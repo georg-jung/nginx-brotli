@@ -1,16 +1,17 @@
-name: Cron base image update check
+name: CI
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron:  '0 1,13 * * *'
+  push:
+    paths-ignore:
+      - '**.md'
+  workflow_call:
 
 env:
+  REGISTRY: docker.io
   IMAGE_NAME: georgjung/nginx-brotli
-  BASE_IMAGE: nginx
 
 jobs:
-  cron-check-matrix:
+  build:
     strategy:
       matrix:
         include:
@@ -20,9 +21,9 @@ jobs:
           - tag: mainline-alpine
             dockerfile: Dockerfile.alpine
             platforms: linux/amd64,linux/arm64
-    uses: ./.github/workflows/rebuild-if-required.yml
+    uses: ./.github/workflows/build.yml
     with:
       dockerfile: ${{ matrix.dockerfile }}
       tag: ${{ matrix.tag }}
       platforms: ${{ matrix.platforms }}
-    secrets: inherit
+      push: false

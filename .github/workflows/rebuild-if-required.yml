@@ -1,0 +1,59 @@
+name: Base image update check
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Docker tag to build, e.g. mainline or mainline-alpine'
+        required: true
+        type: string
+      dockerfile:
+        description: 'Dockerfile in nginxinc/docker-nginx/master/modules/ to use'
+        required: true
+        type: string
+      platforms:
+        description: 'Platforms to rebuild, e.g. "linux/amd64", "linux/arm64", "linux/amd64,linux/arm64"'
+        required: true
+        type: string
+
+env:
+  IMAGE_NAME: georgjung/nginx-brotli
+  BASE_IMAGE: nginx
+
+jobs:
+  check_base_image_updated:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      images-need-updating: ${{ steps.check1.outputs.needs-updating == 'true' || steps.check2.outputs.needs-updating == 'true' }}
+    steps:
+      - name: Docker Image Update Checker ${{ inputs.tag }} amd64
+        id: check1
+        uses: georg-jung/docker-image-update-checker@main
+        with:
+          base-image: ${{ env.BASE_IMAGE }}:${{ inputs.tag }}
+          image: ${{ env.IMAGE_NAME }}:${{ inputs.tag }}
+          os: linux
+          arch: amd64
+          verbose: true
+      - name: Docker Image Update Checker ${{ inputs.tag }} arm64
+        id: check2
+        uses: georg-jung/docker-image-update-checker@main
+        with:
+          base-image: ${{ env.BASE_IMAGE }}:${{ inputs.tag }}
+          image: ${{ env.IMAGE_NAME }}:${{ inputs.tag }}
+          os: linux
+          arch: amd64
+          verbose: true
+  call_rebuild:
+    needs: check_base_image_updated
+    if: ${{ needs.check_base_image_updated.outputs.images-need-updating == 'true' }}
+    uses: ./.github/workflows/build.yml
+    with:
+      tag: ${{ inputs.tag }}
+      dockerfile: ${{ inputs.dockerfile }}
+      platforms: '${{ inputs.platforms }}'
+      push: true
+    secrets: inherit

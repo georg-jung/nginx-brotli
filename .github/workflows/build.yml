@@ -1,10 +1,25 @@
 name: Build custom nginx
 
 on:
-  push:
-    paths-ignore:
-      - '**.md'
   workflow_call:
+    inputs:
+      tag:
+        description: 'Docker tag to build, e.g. mainline or mainline-alpine'
+        required: true
+        type: string
+      dockerfile:
+        description: 'Dockerfile in nginxinc/docker-nginx/master/modules/ to use'
+        required: true
+        type: string
+      platforms:
+        description: 'Platforms to build for, e.g. "linux/amd64", "linux/arm64", "linux/amd64,linux/arm64"'
+        required: true
+        type: string
+      push:
+        description: 'Push to Docker Hub?'
+        required: true
+        type: boolean
+        default: false
 
 env:
   REGISTRY: docker.io
@@ -13,27 +28,21 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - tag: mainline
-            dockerfile: Dockerfile
-          - tag: mainline-alpine
-            dockerfile: Dockerfile.alpine
     steps:
     - uses: actions/checkout@v4 # we need the bash script in this repo
-    - name: get tags besides ${{ matrix.tag }}
+    - name: get tags besides ${{ inputs.tag }}
       id: tags
       run: |
         echo "tags<<eof58302eedc85c" >> $GITHUB_OUTPUT
-        ./docker-tag-groups.sh library/nginx ${{ matrix.tag }} | jq '.[][][]' | sort | uniq | tr -d '\"' | awk '{print "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:" $0}' >> $GITHUB_OUTPUT
+        ./docker-tag-groups.sh library/nginx ${{ inputs.tag }} | jq '.[][][]' | sort | uniq | tr -d '\"' | awk '{print "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:" $0}' >> $GITHUB_OUTPUT
         echo "eof58302eedc85c" >> $GITHUB_OUTPUT
       shell: bash
     - name: Download Dockerfile
-      run: curl https://raw.githubusercontent.com/nginxinc/docker-nginx/master/modules/${{ matrix.dockerfile }} > ${{ matrix.dockerfile }}
+      run: curl https://raw.githubusercontent.com/nginxinc/docker-nginx/master/modules/${{ inputs.dockerfile }} > ${{ inputs.dockerfile }}
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Log in to the Container registry
+      if: ${{ inputs.push }}
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
@@ -43,8 +52,9 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ${{ matrix.dockerfile }}
+        file: ${{ inputs.dockerfile }}
         tags: |
           ${{ steps.tags.outputs.tags }}
+        platforms: ${{ inputs.platforms }}
         build-args: ENABLED_MODULES=brotli
-        push: true
+        push: ${{ inputs.push }}
