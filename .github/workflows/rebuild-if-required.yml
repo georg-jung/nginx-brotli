@@ -45,7 +45,7 @@ jobs:
           base-image: ${{ env.BASE_IMAGE }}:${{ inputs.tag }}
           image: ${{ env.IMAGE_NAME }}:${{ inputs.tag }}
           os: linux
-          arch: amd64
+          arch: arm64
           verbose: true
   call_rebuild:
     needs: check_base_image_updated
