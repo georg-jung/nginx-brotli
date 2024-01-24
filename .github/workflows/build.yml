@@ -40,11 +40,12 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build and push container image
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v5
       with:
         context: .
         file: ${{ matrix.dockerfile }}
         tags: |
           ${{ steps.tags.outputs.tags }}
+        platforms: linux/amd64,linux/arm64
         build-args: ENABLED_MODULES=brotli
         push: true
