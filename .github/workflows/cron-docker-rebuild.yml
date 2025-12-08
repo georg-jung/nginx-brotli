@@ -26,3 +26,22 @@ jobs:
       tag: ${{ matrix.tag }}
       platforms: ${{ matrix.platforms }}
     secrets: inherit
+
+  keepalive:
+    name: Keepalive
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Re-enable workflow
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: sh
+        run: |
+          case "${GITHUB_WORKFLOW_REF:?}" in
+            "${GITHUB_REPOSITORY:?}"/.github/workflows/*.y*ml@*) ;;
+            *) false ;;
+          esac
+          workflow="${GITHUB_WORKFLOW_REF%%@*}"
+          workflow="${workflow#${GITHUB_REPOSITORY}/.github/workflows/}"
+          gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/${workflow}/enable"
