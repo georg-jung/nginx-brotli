@@ -26,3 +26,12 @@ jobs:
       tag: ${{ matrix.tag }}
       platforms: ${{ matrix.platforms }}
     secrets: inherit
+
+  keepalive:
+    name: Keepalive
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gautamkrishnar/keepalive-workflow@v2
