@@ -29,6 +29,8 @@ jobs:
     outputs:
       images-need-updating: ${{ steps.check1.outputs.needs-updating == 'true' || steps.check2.outputs.needs-updating == 'true' }}
     steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
       - name: Docker Image Update Checker ${{ inputs.tag }} amd64
         id: check1
         uses: georg-jung/docker-image-update-checker@main
