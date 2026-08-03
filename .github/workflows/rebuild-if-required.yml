@@ -27,29 +27,20 @@ jobs:
       contents: read
       packages: read
     outputs:
-      images-need-updating: ${{ steps.check1.outputs.needs-updating == 'true' || steps.check2.outputs.needs-updating == 'true' }}
+      images-need-updating: ${{ steps.check.outputs.needs-updating }}
     steps:
       - name: Log in to Docker Hub
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Docker Image Update Checker ${{ inputs.tag }} amd64
-        id: check1
+      - name: Docker Image Update Checker ${{ inputs.tag }}
+        id: check
         uses: lucacome/docker-image-update-checker@3233adf42bb1dddf92f18cf024a8e202dbeaa9b3 # v3.1.0
         with:
           base-image: ${{ env.BASE_IMAGE }}:${{ inputs.tag }}
           image: ${{ env.IMAGE_NAME }}:${{ inputs.tag }}
-          os: linux
-          arch: amd64
-      - name: Docker Image Update Checker ${{ inputs.tag }} arm64
-        id: check2
-        uses: lucacome/docker-image-update-checker@3233adf42bb1dddf92f18cf024a8e202dbeaa9b3 # v3.1.0
-        with:
-          base-image: ${{ env.BASE_IMAGE }}:${{ inputs.tag }}
-          image: ${{ env.IMAGE_NAME }}:${{ inputs.tag }}
-          os: linux
-          arch: arm64
+          platforms: ${{ inputs.platforms }}
   call_rebuild:
     needs: check_base_image_updated
     if: ${{ needs.check_base_image_updated.outputs.images-need-updating == 'true' }}
